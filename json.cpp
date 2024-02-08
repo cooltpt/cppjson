@@ -501,7 +501,6 @@ ostream &operator<<(ostream &os, JSON &j)
             }
             else
             {
-                //os << "null";
                 cerr << "bad type: " << val.type().name() << endl;
                 throw runtime_error("Invalid JSON object");
             }
