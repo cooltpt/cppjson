@@ -146,7 +146,7 @@ ostream &operator<<(ostream &os, JsonObject &obj)
         }
         else if (val.type() == JsonString::type())
         {
-            os << '\"' << JsonString::escape(any_cast<string>(val)) << '\"';
+            os << '"' << JsonString::escape(any_cast<string>(val)) << '"';
         }
         else if (val.type() == JsonArray::type())
         {
@@ -166,7 +166,7 @@ ostream &operator<<(ostream &os, JsonObject &obj)
         {
             os << any_cast<JsonObject&>(val);
         }
-        else if (val.has_value() && val.type() == typeid(nullptr)) {
+        else if (val.has_value() && val.type() == JsonNull::type()) {
             os << "null";
         }
         else
@@ -207,7 +207,7 @@ ostream &operator<<(ostream &os, JsonArray &arr)
         }
         else if (item.type() == JsonString::type())
         {
-            os << '\"' << JsonString::escape(any_cast<string>(item)) << '\"';
+            os << '"' << JsonString::escape(any_cast<string>(item)) << '"';
         }
         else if (item.type() == JsonArray::type())
         {
@@ -227,7 +227,7 @@ ostream &operator<<(ostream &os, JsonArray &arr)
         {
             os << any_cast<JsonObject&>(item);
         }
-        else if (item.has_value() && item.type() == typeid(nullptr))
+        else if (item.has_value() && item.type() == JsonNull::type())
         {
             os << "null";
         }
@@ -270,11 +270,11 @@ istream &operator>>(istream &is, JsonObject &obj)
         while (is.get(ch)) {
             if (isspace(ch)) continue;
             if (iscntrl(ch)) continue;
-            if (ch == '\"') break;
+            if (ch == '"') break;
             throw runtime_error("Invalid JSON key sequence: " + ch);
         }
 
-        if (ch != '\"') {
+        if (ch != '"') {
             throw runtime_error("Invalid JSON key sequence: " + ch);
         }
 
@@ -305,7 +305,7 @@ istream &operator>>(istream &is, JsonObject &obj)
         }
 
         // STRING
-        if (ch == '\"') {
+        if (ch == '"') {
             while (is.get(ch)) {
                 if (ch == '\\') {
                     tok += ch;
@@ -313,7 +313,7 @@ istream &operator>>(istream &is, JsonObject &obj)
                     tok += ch;
                     continue;
                 }
-                if (ch == '\"') break;
+                if (ch == '"') break;
                 tok += ch;
             }
 
@@ -407,7 +407,7 @@ istream &operator>>(istream &is, JsonArray &arr)
         }
 
         // STRING
-        if (ch == '\"') {
+        if (ch == '"') {
             while (is.get(ch)) {
                 if (ch == '\\') {
                     tok += ch;
@@ -415,7 +415,7 @@ istream &operator>>(istream &is, JsonArray &arr)
                     tok += ch;
                     continue;
                 }
-                if (ch == '\"') break;
+                if (ch == '"') break;
                 tok += ch;
             }
 
@@ -483,6 +483,7 @@ int main(int argc, char *argv[])
     m["test3"] = 3.14f;
     m["test4"] = true;
     m["test5"] = false;
+    m["test5"] = nullptr;
 
     JsonObject jm1(m);
     cout << "JM1:" << jm1 << endl;
@@ -491,7 +492,7 @@ int main(int argc, char *argv[])
     v.push_back(123);
     v.push_back(string("hello vec\n"));
     v.push_back(m);
-    m["test6"] = 999;
+    m["test7"] = 999;
 
     JsonArray ja1(v);
     cout << "JA1:" << ja1 << endl;
@@ -501,8 +502,9 @@ int main(int argc, char *argv[])
     cout << "JM2:" << jm2 << endl;
 
     JsonObject jm3;
-    //string jsonString = R"({ \n "name":"John Smith", "age": 30, "isStudent": true, "scores": [90, 85, 95]})";
-    string jsonString = string("{ \"nullval\": null ,\n \"name\":\"John\t Smith\", \"age\": 30.81 , \"isStudent\": true, \"scores\"  : [ { \"k\":\"v\" }, [ 210 ] , 90 , 85, 95.7]}");
+    //string jsonString = R"({  "name":"John \"Smith", "age": 30, "isStudent": true, "scores": [90, 85, 95]})";
+    //string jsonString = string("{ \n \"nullval\": null ,\n \"name\":\"Joh\042n\t \\\"Sm\x22ith\", \"age\": 30.81 , \"isStudent\": true, \"scores\"  : [ { \"k\":\"v\" }, [ 210 ] , 90 , 85, 95.7]}");
+    string jsonString = string("{ \n \"nullval\": null ,\n \"name\":\"John\t \\\"Smith\", \"age\": 30.81 , \"isStudent\": true, \"scores\"  : [ { \"k\":\"v\" }, [ 210 ] , 90 , 85, 95.7]}");
     cout << "Parsing JSON:\n" << jsonString << endl;
     stringstream ss(jsonString);
     ss >> jm3;
