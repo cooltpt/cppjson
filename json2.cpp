@@ -128,7 +128,7 @@ ostream &operator<<(ostream &os, JsonObject &obj)
     for (auto &[key, val] : obj)
     {
         if (count) os << ",";
-        os << "\"" << key << "\":";
+        os << '"' << key << '"' << ':';
 
         if (val.type() == JsonInt::type())
         {
