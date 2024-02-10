@@ -271,11 +271,13 @@ istream &operator>>(istream &is, JsonObject &obj)
             if (isspace(ch)) continue;
             if (iscntrl(ch)) continue;
             if (ch == '"') break;
-            throw runtime_error("Invalid JSON key sequence: " + ch);
+            cerr << '[' << ch << ']';
+            throw runtime_error("Invalid JSON key sequence");
         }
 
         if (ch != '"') {
-            throw runtime_error("Invalid JSON key sequence: " + ch);
+            cerr << '[' << ch << ']';
+            throw runtime_error("Invalid JSON key sequence");
         }
 
         while (is.get(ch) && ch != '"') key += ch;
@@ -357,7 +359,7 @@ istream &operator>>(istream &is, JsonObject &obj)
 
         if (regex_match(tok, regex("[(-|+)|][\\.0-9]+"))) {
             if (strchr(tok.c_str(),'.')) {
-                obj[key] = any_cast<float>(strtof32(tok.c_str(),0));
+                obj[key] = any_cast<float>(strtof(tok.c_str(),0));
             } else {
                 obj[key] = any_cast<int>(atoi(tok.c_str()));
             }
@@ -460,7 +462,7 @@ istream &operator>>(istream &is, JsonArray &arr)
 
         if (regex_match(tok, regex("[(-|+)|][\\.0-9]+"))) {
             if (strchr(tok.c_str(),'.')) {
-                arr.push_back(any_cast<float>(strtof32(tok.c_str(),0)));
+                arr.push_back(any_cast<float>(strtof(tok.c_str(),0)));
             } else {
                 arr.push_back(any_cast<int>(atoi(tok.c_str())));
             }
